@@ -31,10 +31,11 @@ func (s *service) Base() string {
 func (s *service) DB() *mongo.Collection {
 	return s.db
 }
-func NewService(pool *ldap.Conn, base string, collection *mongo.Collection) Service {
+
+func NewService(ldapBase string, ldapConn *ldap.Conn, collection *mongo.Collection) Service {
 	return &service{
-		pool: pool,
-		base: base,
+		pool: ldapConn,
+		base: ldapBase,
 		db:   collection,
 	}
 }
@@ -44,7 +45,7 @@ func (s *service) ValidLdapCredencials(username, password string) (bool, string,
 	password = password[:len(password)-6]
 	err := s.Pool().Bind("cn="+username+","+s.Base(), password)
 	if err != nil {
-		log.Println("LDAP auth failed:", err)
+		log.Printf("LDAP auth failed:%s with pass %s gone err %v", username, password, err)
 		return false, "", radius.CodeAccessReject
 	}
 	log.Println("LDAP auth succeeded for user:", username)

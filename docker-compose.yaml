@@ -7,7 +7,7 @@ services:
     ports:
       - "1812:1812/udp"
     environment:
-      - LDAP_HOST=ldap:389
+      - LDAP_HOST=ldap:1389
       - LDAP_BASE=dc=example,dc=org
       - MONGO_HOST=mongo:27017
       - MONGO_DB=radius
@@ -32,8 +32,6 @@ services:
       - LDAP_PASSWORDS=123456789
       - LDAP_ROOT=dc=example,dc=org
       - LDAP_ADMIN_DN=cn=admin,dc=example,dc=org
-    ports:
-      - "389:1389"
     networks:
       - appnet
 
@@ -41,8 +39,6 @@ services:
     image: mongo:7
     container_name: mongo
     hostname: mongo
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
     environment:
