@@ -1,0 +1,71 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_app
+    ports:
+      - "1812:1812/udp"
+    environment:
+      - LDAP_HOST=ldap:389
+      - LDAP_BASE=dc=example,dc=org
+      - MONGO_HOST=mongo:27017
+      - MONGO_DB=radius
+      - MONGO_TOTP_COLLECTION=totp
+      - SECRET=secret
+      - MONGO_USER=admin
+      - MONGO_PASS=adminpassword
+    depends_on:
+      - ldap
+      - mongo
+    networks:
+      - appnet
+
+  ldap:
+    image: bitnami/openldap:latest
+    container_name: ldap
+    hostname: ldap
+    environment:
+      - LDAP_ADMIN_USERNAME=admin
+      - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_USERS=teste
+      - LDAP_PASSWORDS=123456789
+      - LDAP_ROOT=dc=example,dc=org
+      - LDAP_ADMIN_DN=cn=admin,dc=example,dc=org
+    ports:
+      - "389:1389"
+    networks:
+      - appnet
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    hostname: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=radius
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=adminpassword
+    networks:
+      - appnet
+  mongo-express:
+    image: mongo-express:1.0.2-20
+    container_name: mongo_express
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:adminpassword@mongo:27017/radius?authSource=admin&ssl=false
+    depends_on:
+      - mongo
+    networks:
+      - appnet
+
+volumes:
+  mongo_data:
+
+networks:
+  appnet:
+    driver: bridge
