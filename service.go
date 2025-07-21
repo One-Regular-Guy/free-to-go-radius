@@ -43,7 +43,7 @@ func NewService(ldapBase string, ldapConn *ldap.Conn, collection *mongo.Collecti
 func (s *service) ValidLdapCredencials(username, password string) (bool, string, radius.Code) {
 	otp := password[len(password)-6:]
 	password = password[:len(password)-6]
-	err := s.Pool().Bind("cn="+username+","+s.Base(), password)
+	err := s.Pool().Bind("uid="+username+","+s.Base(), password)
 	if err != nil {
 		log.Printf("LDAP auth failed:%s with pass %s gone err %v", username, password, err)
 		return false, "", radius.CodeAccessReject
