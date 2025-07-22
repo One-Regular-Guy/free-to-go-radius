@@ -8,7 +8,7 @@ services:
       - "1812:1812/udp"
     environment:
       - LDAP_HOST=ldap:1389
-      - LDAP_BASE=dc=example,dc=org
+      - LDAP_BASE=ou=contas,dc=exemplo,dc=com
       - MONGO_HOST=mongo:27017
       - MONGO_DB=radius
       - MONGO_TOTP_COLLECTION=totp
@@ -19,6 +19,30 @@ services:
       - ldap
       - mongo
     networks:
+      - appnet
+  aux:
+    image: auth-side-to-go
+    container_name: to-go
+    ports:
+      - "50051:50051"
+    environment:
+      - LDAP_BASE_DN=dc=exemplo,dc=com
+      - LDAP_BIND_DN=cn=admin,dc=exemplo,dc=com
+      - LDAP_BIND_PASSWORD=umasenhadificil
+      - LDAP_URL=ldap:1389
+      - MONGO_URL=mongodb://mongo:27017
+      - MONGO_USER=admin
+      - MONGO_PASSWORD=adminpassword
+      - MONGO_DB=radius
+      - MONGO_TOTP_COLLECTION=totp
+      - STEP_CA_URL=https://ca.domain.intranet/
+      - STEP_CA_FINGERPRINT=fingerprint
+      - STEP_CA_PROVISIONER=provisioner@ca.domain.intraer
+      - STEP_CA_PROVISIONER_PASSWORD=pass.txt
+    depends_on:
+      - mongo
+    networks:
+      - ldap
       - appnet
 
   ldap:
@@ -54,6 +78,8 @@ services:
       - "8081:8081"
     environment:
       - ME_CONFIG_MONGODB_URL=mongodb://admin:adminpassword@mongo:27017/radius?authSource=admin&ssl=false
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=adminpassword
     depends_on:
       - mongo
     networks:

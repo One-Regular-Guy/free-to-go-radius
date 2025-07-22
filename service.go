@@ -45,7 +45,7 @@ func (s *service) ValidLdapCredencials(username, password string) (bool, string,
 	password = password[:len(password)-6]
 	err := s.Pool().Bind("uid="+username+","+s.Base(), password)
 	if err != nil {
-		log.Printf("LDAP auth failed:%s with pass %s gone err %v", username, password, err)
+		log.Printf("LDAP auth failed:%s gone err %v", username, err)
 		return false, "", radius.CodeAccessReject
 	}
 	log.Println("LDAP auth succeeded for user:", username)
